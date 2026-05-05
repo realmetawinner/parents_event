@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4단계 - 가족 퀴즈</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #0a0f1e;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .atm-header {
+      width: 100%;
+      background: linear-gradient(90deg, #003580, #0057c8);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #00aaff44;
+    }
+    .atm-logo { font-size: 1rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
+    .atm-logo span { color: #00d4ff; }
+    .step-indicator { display: flex; gap: 6px; align-items: center; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a3a5a; }
+    .step-dot.active { background: #00aaff; box-shadow: 0 0 6px #00aaff; }
+    .step-dot.done { background: #00ff88; }
+
+    .atm-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 24px;
+      width: 100%;
+    }
+
+    .step-label { font-size: 0.75rem; color: #4a8aaa; letter-spacing: 3px; text-transform: uppercase; }
+    .step-title { font-size: 1.4rem; font-weight: 700; text-align: center; }
+
+    /* 퀴즈 카드 */
+    .quiz-card {
+      background: #0d1428;
+      border: 1px solid #1a3a6a;
+      border-radius: 16px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .quiz-badge {
+      font-size: 0.7rem;
+      color: #4a8aaa;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    .quiz-question {
+      font-size: 1rem;
+      color: #aaddff;
+      text-align: center;
+      line-height: 1.8;
+      min-height: 3rem;
+    }
+
+    .quiz-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00aaff44, transparent);
+    }
+
+    /* 답 표시창 */
+    .answer-display {
+      background: #0a0f1e;
+      border: 2px solid #1a3a6a;
+      border-radius: 10px;
+      padding: 10px 24px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      min-width: 120px;
+      letter-spacing: 4px;
+      transition: border-color 0.2s;
+    }
+    .answer-display.success { border-color: #00ff88; box-shadow: 0 0 8px #00ff8844; }
+    .answer-display.error   { border-color: #ff4444; animation: shake 0.4s ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+
+    /* 숫자 키패드 */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 280px;
+    }
+
+    .key-btn {
+      background: #0d1a2e;
+      border: 1px solid #1a3a5a;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 700;
+      font-family: 'Noto Sans KR', sans-serif;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .key-btn:active {
+      background: #0057c8;
+      border-color: #00aaff;
+      transform: scale(0.94);
+    }
+    .key-btn.del-btn { font-size: 1rem; color: #6a9aaa; }
+    .key-btn.confirm-btn {
+      background: linear-gradient(135deg, #0057c8, #00aaff);
+      border-color: #00aaff;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+    .key-btn.empty { background: transparent; border-color: transparent; pointer-events: none; }
+
+    .status-msg {
+      font-size: 0.9rem;
+      color: #00aaff;
+      text-align: center;
+      min-height: 1.4rem;
+    }
+    .status-msg.success { color: #00ff88; }
+    .status-msg.error { color: #ff6666; }
+
+    .atm-footer {
+      width: 100%;
+      padding: 14px 24px;
+      background: #050a14;
+      border-top: 1px solid #00aaff22;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #2a4a66;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="atm-header">
+    <div class="atm-logo" onclick="window.location.href='index.html'">FAMILY <span>ATM</span></div>
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+  </header>
+
+  <main class="atm-body">
+    <div class="step-label">STEP 4 / 5</div>
+    <div class="step-title">인출 한도 확인</div>
+
+    <div class="quiz-card">
+      <div class="quiz-badge">⚠️ 보안 퀴즈 인증 필요</div>
+      <div class="quiz-question" id="quiz-question">불러오는 중...</div>
+      <div class="quiz-divider"></div>
+      <div class="quiz-input-wrap">
+        <div class="answer-display" id="answer-display">?</div>
+      </div>
+    </div>
+
+    <div class="keypad">
+      <button class="key-btn" onclick="pressKey('1')">1</button>
+      <button class="key-btn" onclick="pressKey('2')">2</button>
+      <button class="key-btn" onclick="pressKey('3')">3</button>
+      <button class="key-btn" onclick="pressKey('4')">4</button>
+      <button class="key-btn" onclick="pressKey('5')">5</button>
+      <button class="key-btn" onclick="pressKey('6')">6</button>
+      <button class="key-btn" onclick="pressKey('7')">7</button>
+      <button class="key-btn" onclick="pressKey('8')">8</button>
+      <button class="key-btn" onclick="pressKey('9')">9</button>
+      <button class="key-btn del-btn" onclick="deleteLast()">⌫</button>
+      <button class="key-btn" onclick="pressKey('0')">0</button>
+      <button class="key-btn confirm-btn" onclick="checkAnswer()">확인</button>
+    </div>
+
+    <div class="status-msg" id="status-msg">정답을 입력하고 확인을 누르세요</div>
+  </main>
+
+  <footer class="atm-footer">가족의 소중한 날짜를 기억해 주세요 ❤️</footer>
+
+  <script>
+    const settings = JSON.parse(localStorage.getItem('atm_settings') || '{}');
+    const question = settings.quizQuestion || '아빠 생신(05) + 엄마 생신(10) + 내 생일(08) = ?';
+    const correctAnswer = settings.quizAnswer || '0525';
+
+    document.getElementById('quiz-question').textContent = question;
+
+    let input = '';
+
+    function updateDisplay(state) {
+      const el = document.getElementById('answer-display');
+      el.textContent = input || '?';
+      el.className = 'answer-display' + (state ? ' ' + state : '');
+    }
+
+    function pressKey(num) {
+      if (input.length >= 6) return;
+      input += num;
+      updateDisplay('');
+    }
+
+    function deleteLast() {
+      input = input.slice(0, -1);
+      updateDisplay('');
+    }
+
+    function checkAnswer() {
+      if (!input) return;
+      if (input === correctAnswer) {
+        updateDisplay('success');
+        document.getElementById('status-msg').className = 'status-msg success';
+        document.getElementById('status-msg').textContent = '✅ 정답입니다! 인출 한도 승인!';
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        setTimeout(() => window.location.href = 'step5.html', 1400);
+      } else {
+        updateDisplay('error');
+        document.getElementById('status-msg').className = 'status-msg error';
+        document.getElementById('status-msg').textContent = '❌ 오답입니다. 다시 시도해 주세요';
+        if (navigator.vibrate) navigator.vibrate(400);
+        setTimeout(() => {
+          input = '';
+          updateDisplay('');
+          document.getElementById('status-msg').className = 'status-msg';
+          document.getElementById('status-msg').textContent = '정답을 입력하고 확인을 누르세요';
+        }, 1200);
+      }
+    }
+  </script>
+
+</body>
+</html>

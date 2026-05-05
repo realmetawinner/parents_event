@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1단계 - 지문 인식</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #0a0f1e;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .atm-header {
+      width: 100%;
+      background: linear-gradient(90deg, #003580, #0057c8);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #00aaff44;
+    }
+    .atm-logo { font-size: 1rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
+    .atm-logo span { color: #00d4ff; }
+    .step-indicator { display: flex; gap: 6px; align-items: center; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a3a5a; }
+    .step-dot.active { background: #00aaff; box-shadow: 0 0 6px #00aaff; }
+    .step-dot.done { background: #00ff88; }
+
+    .atm-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 24px;
+      width: 100%;
+    }
+
+    .step-label { font-size: 0.75rem; color: #4a8aaa; letter-spacing: 3px; text-transform: uppercase; }
+    .step-title { font-size: 1.4rem; font-weight: 700; text-align: center; line-height: 1.5; }
+    .step-desc { font-size: 0.9rem; color: #6a9aaa; text-align: center; line-height: 1.7; }
+
+    /* 지문 컨테이너 — 1개면 가운데, 2개면 나란히 */
+    .fp-container {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 개별 지문 블록 */
+    .fp-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .fp-name {
+      font-size: 0.85rem;
+      color: #6a9aaa;
+      letter-spacing: 1px;
+    }
+    .fp-name.done { color: #00ff88; font-weight: 700; }
+
+    .fingerprint-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: none;
+    }
+    /* 2개일 때 크기 축소 */
+    .fp-container.two .fingerprint-wrap {
+      width: 100px;
+      height: 100px;
+    }
+    .fp-container.two .fp-ring:nth-child(1) { width: 100px !important; height: 100px !important; }
+    .fp-container.two .fp-ring:nth-child(2) { width: 78px !important; height: 78px !important; }
+    .fp-container.two .fp-ring:nth-child(3) { width: 58px !important; height: 58px !important; }
+    .fp-container.two .fp-icon { font-size: 2.8rem !important; }
+    .fp-container.two .scan-overlay { width: 56px !important; height: 56px !important; }
+
+    .fp-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid #00aaff22;
+      animation: ringPulse 2s ease-out infinite;
+    }
+    .fp-ring:nth-child(1) { width: 120px; height: 120px; animation-delay: 0s; }
+    .fp-ring:nth-child(2) { width: 94px; height: 94px; animation-delay: 0.4s; }
+    .fp-ring:nth-child(3) { width: 68px; height: 68px; animation-delay: 0.8s; }
+
+    @keyframes ringPulse {
+      0% { opacity: 0.6; transform: scale(0.95); }
+      100% { opacity: 0; transform: scale(1.15); }
+    }
+
+    .fp-icon {
+      font-size: 3.2rem;
+      z-index: 1;
+      transition: transform 0.1s;
+      filter: drop-shadow(0 0 12px #00aaff88);
+    }
+
+    .fingerprint-wrap.scanning .fp-icon { transform: scale(0.93); }
+    .fingerprint-wrap.done-wrap { cursor: default; }
+    .fingerprint-wrap.done-wrap .fp-ring { display: none; }
+
+    .scan-overlay {
+      position: absolute;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: none;
+      z-index: 2;
+    }
+    .scan-overlay.active { display: block; }
+
+    .laser-beam {
+      position: absolute;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, transparent, #00ff88, transparent);
+      top: 0;
+      animation: laserScan 0.4s linear infinite;
+      box-shadow: 0 0 8px #00ff88;
+    }
+    @keyframes laserScan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    /* 게이지 */
+    .gauge-wrap {
+      width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .gauge-wrap.visible { opacity: 1; }
+    .gauge-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #4a8aaa;
+    }
+    .gauge-bar {
+      width: 100%;
+      height: 8px;
+      background: #0a1a2a;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #0a3a5a;
+    }
+    .gauge-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0057c8, #00ff88);
+      border-radius: 4px;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 8px #00ff8866;
+    }
+
+    .status-msg {
+      font-size: 0.9rem;
+      color: #00aaff;
+      text-align: center;
+      min-height: 1.4rem;
+      letter-spacing: 1px;
+    }
+    .status-msg.success { color: #00ff88; }
+
+    .atm-footer {
+      width: 100%;
+      padding: 14px 24px;
+      background: #050a14;
+      border-top: 1px solid #00aaff22;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #2a4a66;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="atm-header">
+    <div class="atm-logo" onclick="window.location.href='index.html'">FAMILY <span>ATM</span></div>
+    <div class="step-indicator">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+  </header>
+
+  <main class="atm-body">
+    <div class="step-label">STEP 1 / 5</div>
+    <div class="step-title">생체 인식 보안 시스템</div>
+    <div class="step-desc" id="step-desc">지문 아이콘을 2초간 꾹 눌러주세요</div>
+
+    <div class="fp-container" id="fp-container"></div>
+
+    <div class="gauge-wrap" id="gauge-wrap">
+      <div class="gauge-label">
+        <span id="gauge-name">생체 인식 중...</span>
+        <span id="gauge-pct">0%</span>
+      </div>
+      <div class="gauge-bar">
+        <div class="gauge-fill" id="gauge-fill"></div>
+      </div>
+    </div>
+
+    <div class="status-msg" id="status-msg">지문을 인식해 주세요</div>
+  </main>
+
+  <footer class="atm-footer">손가락을 떼지 마세요 — 인식이 완료될 때까지 유지해 주세요</footer>
+
+  <script>
+    const settings = JSON.parse(localStorage.getItem('atm_settings') || '{}');
+    const persons = [
+      settings.dadName ? { name: settings.dadName } : null,
+      settings.momName ? { name: settings.momName } : null,
+    ].filter(Boolean);
+
+    // 이름이 하나도 없으면 기본 1명
+    if (persons.length === 0) persons.push({ name: '고객' });
+
+    const isTwoPerson = persons.length === 2;
+    const doneState = persons.map(() => false);
+    let activeIdx = null;
+    let scanInterval = null;
+    let progress = 0;
+
+    // UI 생성
+    const container = document.getElementById('fp-container');
+    if (isTwoPerson) container.classList.add('two');
+
+    persons.forEach((person, idx) => {
+      const block = document.createElement('div');
+      block.className = 'fp-block';
+
+      block.innerHTML = `
+        <div class="fp-name" id="fp-name-${idx}">${person.name}</div>
+        <div class="fingerprint-wrap" id="fp-wrap-${idx}">
+          <div class="fp-ring"></div>
+          <div class="fp-ring"></div>
+          <div class="fp-ring"></div>
+          <div class="fp-icon" id="fp-icon-${idx}">🫆</div>
+          <div class="scan-overlay" id="scan-overlay-${idx}">
+            <div class="laser-beam"></div>
+          </div>
+        </div>
+      `;
+
+      const wrap = block.querySelector('.fingerprint-wrap');
+      wrap.addEventListener('mousedown', (e) => { e.preventDefault(); startScan(idx); });
+      wrap.addEventListener('touchstart', (e) => { e.preventDefault(); startScan(idx); }, { passive: false });
+      wrap.addEventListener('mouseup', () => stopScan(idx));
+      wrap.addEventListener('touchend', () => stopScan(idx));
+
+      container.appendChild(block);
+    });
+
+    // 2명일 때 안내문 업데이트
+    if (isTwoPerson) {
+      document.getElementById('step-desc').textContent =
+        `두 분 모두 지문을 순서대로 인식해 주세요`;
+    }
+
+    function startScan(idx) {
+      if (doneState[idx]) return;
+      if (activeIdx !== null && activeIdx !== idx) return;
+      activeIdx = idx;
+
+      document.getElementById('scan-overlay-' + idx).classList.add('active');
+      document.getElementById('fp-wrap-' + idx).classList.add('scanning');
+      document.getElementById('gauge-wrap').classList.add('visible');
+      document.getElementById('gauge-name').textContent = persons[idx].name + ' 인식 중...';
+      document.getElementById('status-msg').textContent = '인식 중...';
+
+      progress = 0;
+      scanInterval = setInterval(() => {
+        progress += 2;
+        document.getElementById('gauge-fill').style.width = progress + '%';
+        document.getElementById('gauge-pct').textContent = progress + '%';
+        if (progress >= 100) {
+          clearInterval(scanInterval);
+          onScanComplete(idx);
+        }
+      }, 40);
+    }
+
+    function stopScan(idx) {
+      if (doneState[idx] || progress >= 100) return;
+      clearInterval(scanInterval);
+      activeIdx = null;
+      progress = 0;
+      document.getElementById('scan-overlay-' + idx).classList.remove('active');
+      document.getElementById('fp-wrap-' + idx).classList.remove('scanning');
+      document.getElementById('gauge-fill').style.width = '0%';
+      document.getElementById('gauge-pct').textContent = '0%';
+      document.getElementById('gauge-wrap').classList.remove('visible');
+      document.getElementById('status-msg').textContent = '지문을 인식해 주세요';
+    }
+
+    function onScanComplete(idx) {
+      doneState[idx] = true;
+      activeIdx = null;
+
+      document.getElementById('scan-overlay-' + idx).classList.remove('active');
+      document.getElementById('fp-wrap-' + idx).classList.remove('scanning');
+      document.getElementById('fp-wrap-' + idx).classList.add('done-wrap');
+      document.getElementById('fp-icon-' + idx).textContent = '✅';
+      document.getElementById('fp-name-' + idx).classList.add('done');
+
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+      const allDone = doneState.every(Boolean);
+      if (allDone) {
+        document.getElementById('gauge-wrap').classList.remove('visible');
+        document.getElementById('status-msg').className = 'status-msg success';
+        document.getElementById('status-msg').textContent = '✅ 모든 인증 완료!';
+        setTimeout(() => window.location.href = 'step2.html', 1400);
+      } else {
+        // 남은 사람 안내
+        const nextIdx = doneState.findIndex(v => !v);
+        document.getElementById('gauge-fill').style.width = '0%';
+        document.getElementById('gauge-pct').textContent = '0%';
+        document.getElementById('gauge-wrap').classList.remove('visible');
+        document.getElementById('status-msg').textContent =
+          `${persons[nextIdx].name}님 지문을 인식해 주세요`;
+      }
+    }
+  </script>
+
+</body>
+</html>

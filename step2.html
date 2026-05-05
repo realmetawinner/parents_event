@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2단계 - 패턴 인식</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #0a0f1e;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .atm-header {
+      width: 100%;
+      background: linear-gradient(90deg, #003580, #0057c8);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #00aaff44;
+    }
+
+    .atm-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+    }
+
+    .atm-logo span {
+      color: #00d4ff;
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1a3a5a;
+    }
+
+    .step-dot.active {
+      background: #00aaff;
+      box-shadow: 0 0 6px #00aaff;
+    }
+
+    .step-dot.done {
+      background: #00ff88;
+    }
+
+    .atm-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 16px;
+      width: 100%;
+    }
+
+    .step-label {
+      font-size: 0.75rem;
+      color: #4a8aaa;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .step-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .step-desc {
+      font-size: 0.88rem;
+      color: #6a9aaa;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    /* 패턴 영역 */
+    .pattern-area {
+      position: relative;
+      width: 300px;
+      height: 240px;
+      touch-action: none;
+    }
+
+    #pattern-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 240px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-template-rows: repeat(4, 60px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .pcell {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* 반투명 글자 힌트 레이어 */
+    .pchar {
+      position: absolute;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: rgba(180, 220, 255, 0.3);
+      pointer-events: none;
+      z-index: 2;
+      letter-spacing: 0;
+    }
+
+    /* 패턴 점 — 기본은 완전 투명, 선택 시에만 표시 */
+    .pdot {
+      width: 14px;
+      height: 14px;
+      background: transparent;
+      border-radius: 50%;
+      border: none;
+      z-index: 3;
+      position: relative;
+      transition: all 0.1s;
+      pointer-events: none;
+    }
+
+    .pdot.active {
+      width: 20px;
+      height: 20px;
+      background: #ff6699;
+      border: 2px solid #ffaacc;
+      box-shadow: 0 0 14px #ff669999;
+    }
+
+    .pdot.success {
+      width: 20px;
+      height: 20px;
+      background: #ff3377;
+      border: 2px solid #ff88bb;
+      box-shadow: 0 0 14px #ff337799;
+    }
+
+    .pdot.error {
+      width: 20px;
+      height: 20px;
+      background: #ff4444;
+      border: 2px solid #ff6666;
+      box-shadow: 0 0 12px #ff444499;
+    }
+
+    /* 하트 폭죽 오버레이 */
+    #heart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+
+    .heart-particle {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0;
+      animation: heartBurst linear forwards;
+    }
+
+    @keyframes heartBurst {
+      0% {
+        transform: translate(0, 0) scale(0.2) rotate(0deg);
+        opacity: 1;
+      }
+
+      60% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .status-msg {
+      font-size: 0.9rem;
+      color: #00aaff;
+      text-align: center;
+      min-height: 1.4rem;
+      letter-spacing: 1px;
+    }
+
+    .status-msg.success {
+      color: #00ff88;
+    }
+
+    .status-msg.error {
+      color: #ff6666;
+    }
+
+    .atm-footer {
+      width: 100%;
+      padding: 14px 24px;
+      background: #050a14;
+      border-top: 1px solid #00aaff22;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #2a4a66;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="atm-header">
+    <div class="atm-logo" onclick="window.location.href='index.html'">FAMILY <span>ATM</span></div>
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+  </header>
+
+  <main class="atm-body">
+    <div class="step-label">STEP 2 / 5</div>
+    <div class="step-title">보안 패턴 인식</div>
+    <div class="step-desc">'다함께 행복해집니다'를 따라가 보세요</div>
+
+    <div class="pattern-area" id="pattern-area">
+      <canvas id="pattern-canvas" width="300" height="240"></canvas>
+      <div class="pattern-grid" id="pattern-grid"></div>
+    </div>
+
+    <div class="status-msg" id="status-msg">패턴을 그어주세요</div>
+  </main>
+
+  <div id="heart-overlay"></div>
+
+  <footer class="atm-footer">화면에서 손가락을 떼지 말고 이어서 그려주세요</footer>
+
+  <script>
+    const COLS = 5, ROWS = 4;
+
+    // 글자 배열 [행0~3][열0~4]
+    const CHARS = [
+      ['룰', '함', '사', '니', '별'],
+      ['께', '정', '다', '표', '집'],
+      ['츄', '행', '꺽', '해', '퀵'],
+      ['쑥', '택', '복', '퀭', '슭'],
+    ];
+
+    // 정답 패턴: 열(row 1-indexed), 행(col 1-indexed) → flat index (row-1)*5+(col-1)
+    // 2열3행→1열2행→2열1행→3열2행→4열3행→3열4행→2열5행→1열4행→2열3행
+    const CORRECT = [
+      [2, 3], [1, 2], [2, 1], [3, 2], [4, 3], [3, 4], [2, 5], [1, 4], [2, 3]
+    ].map(([r, c]) => (r - 1) * COLS + (c - 1));
+    // 결과: [7, 1, 5, 11, 17, 13, 9, 3, 7]  →  다→함→께→행→복→해→집→니→다
+
+    let sequence = [];
+    let isDrawing = false;
+    let cursorPos = null;
+    const dotEls = [];
+
+    // 그리드 생성
+    const grid = document.getElementById('pattern-grid');
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const idx = r * COLS + c;
+        const cell = document.createElement('div');
+        cell.className = 'pcell';
+        cell.dataset.idx = idx;
+
+        const charEl = document.createElement('div');
+        charEl.className = 'pchar';
+        charEl.textContent = CHARS[r][c];
+
+        const dot = document.createElement('div');
+        dot.className = 'pdot';
+        dot.id = 'dot-' + idx;
+
+        cell.appendChild(charEl);
+        cell.appendChild(dot);
+        grid.appendChild(cell);
+        dotEls.push(dot);
+      }
+    }
+
+    // 이벤트
+    const area = document.getElementById('pattern-area');
+    area.addEventListener('mousedown', onStart);
+    area.addEventListener('mousemove', onMove);
+    area.addEventListener('mouseup', onEnd);
+    area.addEventListener('touchstart', onStart, { passive: false });
+    area.addEventListener('touchmove', onMove, { passive: false });
+    area.addEventListener('touchend', onEnd, { passive: false });
+
+    function getPos(e) {
+      if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    // 셀 크기 60px 기준, 반경 22px 이내에 있는 가장 가까운 점 반환
+    const HIT_RADIUS = 22;
+
+    function nodeAtPoint(x, y) {
+      const areaRect = area.getBoundingClientRect();
+      const rx = x - areaRect.left;
+      const ry = y - areaRect.top;
+      let best = -1, bestDist = Infinity;
+      for (let i = 0; i < COLS * ROWS; i++) {
+        const c = getDotCenter(i);
+        const dist = Math.hypot(rx - c.x, ry - c.y);
+        if (dist < HIT_RADIUS && dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      }
+      return best;
+    }
+
+    function onStart(e) {
+      e.preventDefault();
+      const pos = getPos(e);
+      const idx = nodeAtPoint(pos.x, pos.y);
+      if (idx < 0) return;
+      sequence = [idx];
+      isDrawing = true;
+      cursorPos = pos;
+      updateDots('active');
+      redraw();
+    }
+
+    function onMove(e) {
+      e.preventDefault();
+      if (!isDrawing) return;
+      const pos = getPos(e);
+      cursorPos = pos;
+      const idx = nodeAtPoint(pos.x, pos.y);
+
+      if (idx >= 0 && idx !== sequence[sequence.length - 1]) {
+        const alreadyIn = sequence.includes(idx);
+        if (!alreadyIn) {
+          sequence.push(idx);
+          updateDots('active');
+        } else if (
+          alreadyIn &&
+          sequence.length === CORRECT.length - 1 &&
+          idx === CORRECT[CORRECT.length - 1]
+        ) {
+          // 시작점으로 되돌아오는 마지막 단계 허용
+          sequence.push(idx);
+          isDrawing = false;
+          cursorPos = null;
+          redraw();
+          checkPattern();
+          return;
+        }
+      }
+      redraw();
+    }
+
+    function onEnd(e) {
+      e.preventDefault();
+      if (!isDrawing) return;
+      isDrawing = false;
+      cursorPos = null;
+      redraw();
+      checkPattern();
+    }
+
+    function getDotCenter(idx) {
+      const dot = dotEls[idx];
+      const areaRect = area.getBoundingClientRect();
+      const dotRect = dot.getBoundingClientRect();
+      return {
+        x: dotRect.left + dotRect.width / 2 - areaRect.left,
+        y: dotRect.top + dotRect.height / 2 - areaRect.top,
+      };
+    }
+
+    function redraw() {
+      const canvas = document.getElementById('pattern-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (sequence.length === 0) return;
+
+      const areaRect = area.getBoundingClientRect();
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // 그림자 라인 (두껍고 연하게)
+      ctx.strokeStyle = 'rgba(255, 100, 150, 0.2)';
+      ctx.lineWidth = 10;
+      drawPath(ctx, areaRect);
+
+      // 메인 라인 (분홍색)
+      ctx.strokeStyle = 'rgba(255, 100, 150, 0.85)';
+      ctx.lineWidth = 3;
+      drawPath(ctx, areaRect);
+    }
+
+    function drawPath(ctx, areaRect) {
+      ctx.beginPath();
+      const first = getDotCenter(sequence[0]);
+      ctx.moveTo(first.x, first.y);
+      for (let i = 1; i < sequence.length; i++) {
+        const c = getDotCenter(sequence[i]);
+        ctx.lineTo(c.x, c.y);
+      }
+      if (isDrawing && cursorPos) {
+        ctx.lineTo(cursorPos.x - areaRect.left, cursorPos.y - areaRect.top);
+      }
+      ctx.stroke();
+    }
+
+    function updateDots(state) {
+      dotEls.forEach((d, i) => {
+        d.className = 'pdot' + (sequence.includes(i) ? (' ' + state) : '');
+      });
+    }
+
+    function launchHearts() {
+      const overlay = document.getElementById('heart-overlay');
+      const emojis = ['❤️', '💗', '💖', '💝', '💓', '💕', '🩷'];
+      let count = 0;
+      function spawn() {
+        if (count >= 60) return;
+        count++;
+        const el = document.createElement('div');
+        el.className = 'heart-particle';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+        // 화면 전체 랜덤 시작 위치
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        el.style.left = startX + 'px';
+        el.style.top = startY + 'px';
+        el.style.fontSize = (1.2 + Math.random() * 2.2) + 'rem';
+
+        // 날아가는 방향 (사방으로 폭죽)
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 80 + Math.random() * 180;
+        el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        el.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+        el.style.setProperty('--rot', (Math.random() * 360 - 180) + 'deg');
+
+        const dur = 0.6 + Math.random() * 0.8;
+        el.style.animationDuration = dur + 's';
+        el.style.animationDelay = Math.random() * 0.6 + 's';
+        overlay.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+        setTimeout(spawn, 30);
+      }
+      spawn();
+    }
+
+    function checkPattern() {
+      const match =
+        sequence.length === CORRECT.length &&
+        sequence.every((v, i) => v === CORRECT[i]);
+
+      if (match) {
+        updateDots('success');
+        document.getElementById('status-msg').className = 'status-msg success';
+        document.getElementById('status-msg').textContent = '💗 패턴 인증 완료!';
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        launchHearts();
+        setTimeout(() => window.location.href = 'step3.html', 2200);
+      } else {
+        updateDots('error');
+        document.getElementById('status-msg').className = 'status-msg error';
+        document.getElementById('status-msg').textContent = '❌ 패턴이 올바르지 않습니다';
+        if (navigator.vibrate) navigator.vibrate(400);
+        setTimeout(() => {
+          sequence = [];
+          dotEls.forEach(d => d.className = 'pdot');
+          document.getElementById('status-msg').className = 'status-msg';
+          document.getElementById('status-msg').textContent = '패턴을 다시 그어주세요';
+          redraw();
+        }, 1000);
+      }
+    }
+  </script>
+
+</body>
+
+</html>
