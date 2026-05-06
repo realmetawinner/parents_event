@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>5단계 - 인출 완료</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Noto Sans KR', sans-serif;
       background: #0a0f1e;
       color: #fff;
-      height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -27,311 +22,145 @@
       user-select: none;
     }
 
+    /* 헤더 */
     .atm-header {
       width: 100%;
       background: linear-gradient(90deg, #003580, #0057c8);
-      padding: 16px 24px;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 2px solid #00aaff44;
+      flex-shrink: 0;
     }
+    .atm-logo { font-size: 1rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
+    .atm-logo span { color: #00d4ff; }
+    .step-indicator { display: flex; gap: 6px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a3a5a; }
+    .step-dot.active { background: #00aaff; box-shadow: 0 0 6px #00aaff; }
+    .step-dot.done { background: #00ff88; }
 
-    .atm-logo {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      cursor: pointer;
-    }
-
-    .atm-logo span {
-      color: #00d4ff;
-    }
-
-    .step-indicator {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .step-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #1a3a5a;
-    }
-
-    .step-dot.active {
-      background: #00aaff;
-      box-shadow: 0 0 6px #00aaff;
-    }
-
-    .step-dot.done {
-      background: #00ff88;
-    }
-
+    /* 메인 바디 */
     .atm-body {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 24px;
-      padding: 24px;
+      gap: 20px;
+      padding: 10px 20px;
       width: 100%;
+      min-height: 0;
     }
 
-    .step-label {
-      font-size: 0.75rem;
-      color: #4a8aaa;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
+    .step-label { font-size: 0.7rem; color: #4a8aaa; letter-spacing: 3px; text-transform: uppercase; }
 
-    /* Phase 1: 카드 감지 안됨 */
-    #phase-card {
+    /* 공통 레이아웃 */
+    .phase-container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      width: 100%;
-    }
-
-    .warning-icon {
-      font-size: 4rem;
-      animation: warningBlink 1s ease-in-out infinite;
-    }
-
-    @keyframes warningBlink {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.4;
-      }
-    }
-
-    .warning-card {
-      background: #1a0a00;
-      border: 2px solid #ff660044;
-      border-radius: 16px;
-      padding: 20px 24px;
-      text-align: center;
-      max-width: 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .warning-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #ff8844;
-    }
-
-    .warning-desc {
-      font-size: 0.85rem;
-      color: #aa7755;
-      line-height: 1.7;
-    }
-
-    /* 폰 뒤집기 애니메이션 */
-    .flip-anim {
-      font-size: 3rem;
-      animation: flipPhone 2s ease-in-out infinite;
-    }
-
-    @keyframes flipPhone {
-      0% {
-        transform: rotateY(0deg);
-      }
-
-      40% {
-        transform: rotateY(180deg);
-      }
-
-      60% {
-        transform: rotateY(180deg);
-      }
-
-      100% {
-        transform: rotateY(360deg);
-      }
-    }
-
-    /* Phase 2: 인출 승인 */
-    #phase-approve {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      width: 100%;
-    }
-
-    .approve-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-align: center;
-      color: #00ff88;
-    }
-
-    .approve-desc {
-      font-size: 0.9rem;
-      color: #6a9aaa;
-      text-align: center;
-      line-height: 1.7;
-    }
-
-    .approve-btn {
-      background: linear-gradient(135deg, #006600, #00cc44);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 18px 48px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      cursor: pointer;
-      font-family: 'Noto Sans KR', sans-serif;
-      box-shadow: 0 4px 24px #00cc4455;
-      animation: btnGlow 1.5s ease-in-out infinite;
-    }
-
-    @keyframes btnGlow {
-
-      0%,
-      100% {
-        box-shadow: 0 4px 24px #00cc4455;
-      }
-
-      50% {
-        box-shadow: 0 4px 40px #00cc44aa;
-      }
-    }
-
-    /* Phase 3: 피날레 */
-    #phase-finale {
-      display: none;
       flex-direction: column;
       align-items: center;
       gap: 20px;
       width: 100%;
+      max-width: 480px;
     }
 
-    .finale-title {
-      font-size: 1.6rem;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.5;
+    /* Phase 1: 카드 경고 */
+    .warning-icon { font-size: 3rem; animation: warningBlink 1s infinite; }
+    @keyframes warningBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .warning-card {
+      background: #1a0a00; border: 2px solid #ff660044;
+      border-radius: 16px; padding: 15px 20px;
+      text-align: center; display: flex; flex-direction: column; gap: 10px;
     }
+    .warning-title { font-size: 1rem; font-weight: 700; color: #ff8844; }
+    .warning-desc { font-size: 0.85rem; color: #aa7755; line-height: 1.6; }
+    .flip-anim { font-size: 2.5rem; animation: flipPhone 2s infinite; }
+    @keyframes flipPhone { 0% { transform: rotateY(0deg); } 40%, 60% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
 
-    /* 돈뭉치 애니메이션 */
-    .money-shower {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
-      overflow: hidden;
-    }
-
-    .money-bill {
-      position: absolute;
-      font-size: 2rem;
-      animation: moneyFall linear forwards;
-      top: -60px;
-    }
-
-    @keyframes moneyFall {
-      0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-      }
-
-      100% {
-        transform: translateY(110vh) rotate(720deg);
-        opacity: 0.6;
-      }
-    }
-
-    .finale-card {
-      background: linear-gradient(135deg, #0a1a0a, #0a2a0a);
-      border: 2px solid #00cc4466;
-      border-radius: 20px;
-      padding: 28px 24px;
-      text-align: center;
-      max-width: 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 0 40px #00cc4422;
-    }
-
-    .finale-emoji {
-      font-size: 3rem;
-    }
-
-    .finale-msg {
-      font-size: 1rem;
-      color: #aaddaa;
-      line-height: 1.8;
-    }
-
-    .finale-name {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #00ff88;
-    }
-
-    .restart-btn {
-      background: transparent;
-      border: 1px solid #1a3a5a;
-      color: #4a8aaa;
-      border-radius: 50px;
-      padding: 12px 32px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      font-family: 'Noto Sans KR', sans-serif;
-      transition: all 0.2s;
-    }
-
-    .restart-btn:hover {
-      color: #aaddff;
-      border-color: #4a8aaa;
-    }
-
-    /* 카드 확인 버튼 */
     .card-confirm-btn {
       background: linear-gradient(135deg, #0057c8, #00aaff);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 16px 40px;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      cursor: pointer;
-      font-family: 'Noto Sans KR', sans-serif;
-      box-shadow: 0 4px 20px #00aaff44;
+      color: #fff; border: none; border-radius: 50px;
+      padding: 14px 36px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
     }
 
+    /* Phase 2: 인출 승인 */
+    #phase-approve { display: none; text-align: center; }
+    .approve-title { font-size: 1.4rem; font-weight: 700; color: #00ff88; margin-bottom: 10px; }
+    .approve-desc { font-size: 0.85rem; color: #6a9aaa; line-height: 1.6; margin-bottom: 20px; }
+    .approve-btn {
+      background: linear-gradient(135deg, #006600, #00cc44);
+      color: #fff; border: none; border-radius: 50px;
+      padding: 16px 48px; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+      animation: btnGlow 1.5s infinite;
+    }
+    @keyframes btnGlow { 0%, 100% { box-shadow: 0 4px 20px #00cc4444; } 50% { box-shadow: 0 4px 30px #00cc4488; } }
+
+    /* Phase 3: 피날레 */
+    #phase-finale { display: none; }
+    .finale-card {
+      background: linear-gradient(135deg, #0a1a0a, #0a2a0a);
+      border: 2px solid #00cc4466; border-radius: 20px;
+      padding: 20px; text-align: center;
+      display: flex; flex-direction: column; gap: 10px;
+      box-shadow: 0 0 30px #00cc4422;
+    }
+    .finale-emoji { font-size: 2.5rem; }
+    .finale-name { font-size: 1.1rem; font-weight: 700; color: #00ff88; }
+    .finale-msg { font-size: 0.9rem; color: #aaddaa; line-height: 1.6; }
+    .restart-btn {
+      background: transparent; border: 1px solid #1a3a5a; color: #4a8aaa;
+      border-radius: 50px; padding: 10px 24px; font-size: 0.8rem; cursor: pointer;
+    }
+
+    /* 돈 애니메이션 */
+    .money-shower { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: hidden; }
+    .money-bill { position: absolute; font-size: 1.5rem; animation: moneyFall linear forwards; top: -50px; }
+    @keyframes moneyFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0.4; } }
+
+    /* 푸터 */
     .atm-footer {
-      width: 100%;
-      padding: 14px 24px;
-      background: #050a14;
-      border-top: 1px solid #00aaff22;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #2a4a66;
+      width: 100%; padding: 10px 24px; background: #050a14;
+      border-top: 1px solid #00aaff22; text-align: center;
+      font-size: 0.7rem; color: #2a4a66; flex-shrink: 0;
+    }
+
+    /* ======================================================
+       가로 모드 (Landscape) 최적화
+    ====================================================== */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .atm-header { padding: 6px 24px; }
+      .atm-footer { padding: 6px 24px; }
+      .atm-body { gap: 10px; padding: 5px 20px; }
+      .step-label { display: none; }
+
+      /* Phase 1 가로 배치 */
+      #phase-card {
+        flex-direction: row;
+        justify-content: center;
+        gap: 30px;
+      }
+      .warning-visual { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+      .warning-icon { font-size: 2rem; }
+      .flip-anim { font-size: 2rem; }
+      .warning-card { max-width: 300px; padding: 10px 15px; }
+      .warning-title { font-size: 0.9rem; }
+      .warning-desc { font-size: 0.75rem; }
+
+      /* Phase 3 가로 배치 */
+      #phase-finale {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+      }
+      .finale-card { max-width: 320px; padding: 15px; }
+      .finale-emoji { font-size: 2rem; }
+      .finale-msg br:first-child { display: none; } /* 여백 줄이기 */
     }
   </style>
 </head>
-
 <body>
 
   <header class="atm-header">
@@ -349,46 +178,42 @@
     <div class="step-label">STEP 5 / 5</div>
 
     <!-- Phase 1: 카드 감지 안됨 -->
-    <div id="phase-card">
-      <div class="warning-icon">⚠️</div>
+    <div id="phase-card" class="phase-container">
+      <div class="warning-visual">
+        <div class="warning-icon">⚠️</div>
+        <div class="flip-anim">📱</div>
+      </div>
       <div class="warning-card">
         <div class="warning-title">카드가 감지되지 않았습니다</div>
         <div class="warning-desc">
-          ATM기기 뒷면에서 효도 카드를<br>찾아 주세요
+          기기 뒷면에서 효도 카드를 찾아주세요<br>카드를 찾으셨다면 버튼을 눌러주세요
         </div>
-        <div class="flip-anim">📱</div>
-        <div class="warning-desc">
-          효도카드를 찾은 뒤에<br>아래의 버튼을 눌러주세요
-        </div>
+        <button class="card-confirm-btn" onclick="goToApprove()">카드를 찾았습니다 ✅</button>
       </div>
-      <button class="card-confirm-btn" onclick="goToApprove()">카드를 찾았습니다 ✅</button>
     </div>
 
     <!-- Phase 2: 인출 승인 -->
-    <div id="phase-approve">
+    <div id="phase-approve" class="phase-container">
       <div class="approve-title">✅ 카드 인증 완료</div>
-      <div class="approve-desc">모든 보안 절차가 완료되었습니다<br>카드 투입기에 카드를 넣어주세요<br>현금이 인출 후, 아래의 버튼을 눌러주세요</div>
+      <div class="approve-desc">모든 절차가 완료되었습니다<br>실물 카드를 투입기에 넣어주신 후<br>아래 버튼을 눌러 인출을 완료하세요</div>
       <button class="approve-btn" onclick="goToFinale()">💰 인출 완료</button>
     </div>
 
     <!-- Phase 3: 피날레 -->
-    <div id="phase-finale">
+    <div id="phase-finale" class="phase-container">
       <div class="finale-card">
         <div class="finale-emoji">💝</div>
         <div class="finale-name" id="finale-name">고객님</div>
         <div class="finale-msg">
-          어버이날을 축하드립니다<br><br>
-          항상 건강하시고<br>
-          행복한 하루 되세요 ❤️
+          어버이날을 진심으로 축하드립니다!<br>
+          항상 건강하시고 행복하세요 ❤️
         </div>
       </div>
       <button class="restart-btn" onclick="window.location.href='index.html'">← 처음으로 돌아가기</button>
     </div>
-
   </main>
 
   <div class="money-shower" id="money-shower"></div>
-
   <footer class="atm-footer" id="footer-msg">실물 카드를 기기 뒷면에서 확인해 주세요</footer>
 
   <script>
@@ -405,10 +230,8 @@
       document.getElementById('phase-finale').style.display = 'flex';
       document.getElementById('footer-msg').textContent = '감사합니다 ❤️';
 
-      const dadName = settings.dadName || '';
-      const momName = settings.momName || '';
-      if (dadName || momName) {
-        const names = [dadName, momName].filter(Boolean).join(', ');
+      const names = [settings.dadName, settings.momName].filter(Boolean).join(', ');
+      if (names) {
         document.getElementById('finale-name').textContent = names + ' 고객님';
       }
 
@@ -418,28 +241,25 @@
 
     function launchMoneyShower() {
       const container = document.getElementById('money-shower');
-      const emojis = ['💵', '💴', '💶', '💷', '💰', '🪙', '✨'];
+      const emojis = ['💵', '💴', '💶', '💰', '✨'];
       let count = 0;
 
       function spawnBill() {
-        if (count > 60) return;
+        if (count > 50) return;
         count++;
         const el = document.createElement('div');
         el.className = 'money-bill';
         el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
         el.style.left = Math.random() * 100 + '%';
-        el.style.fontSize = (1.5 + Math.random() * 2) + 'rem';
-        const dur = 2 + Math.random() * 3;
-        el.style.animationDuration = dur + 's';
+        el.style.fontSize = (1.2 + Math.random() * 1.5) + 'rem';
+        el.style.animationDuration = (2 + Math.random() * 2) + 's';
         el.style.animationDelay = Math.random() * 2 + 's';
         container.appendChild(el);
         el.addEventListener('animationend', () => el.remove());
-        setTimeout(spawnBill, 80);
+        setTimeout(spawnBill, 100);
       }
       spawnBill();
     }
   </script>
-
 </body>
-
 </html>
