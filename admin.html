@@ -6,25 +6,178 @@
   <title>관리자 설정</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+    
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans KR', sans-serif; background: #0a0f1e; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    .admin-header { background: linear-gradient(90deg, #1a0030, #3a0060); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #aa00ff44; }
-    .admin-title { display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 700; }
-    .admin-badge { background: #aa00ff33; border: 1px solid #aa00ff88; color: #cc88ff; font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; }
-    .admin-body { flex: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; max-width: 480px; width: 100%; margin: 0 auto; }
-    .setting-card { background: #0d1428; border: 1px solid #2a1a4a; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-    .setting-card h3 { font-size: 0.95rem; color: #cc88ff; display: flex; align-items: center; gap: 8px; }
-    .field-group { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 0.8rem; color: #8a7aaa; }
-    input[type="text"], textarea { background: #0a0f1e; border: 1px solid #2a2a4a; border-radius: 8px; color: #ffffff; padding: 10px 14px; width: 100%; outline: none; }
-    .pin-input-wrap { display: flex; gap: 10px; justify-content: center; }
-    .pin-digit { width: 52px; height: 52px; background: #0a0f1e; border: 1px solid #2a2a4a; border-radius: 8px; color: #ffffff; font-size: 1.4rem; text-align: center; outline: none; }
-    .keyword-hint { display: flex; gap: 8px; flex-wrap: wrap; }
-    .keyword-tag { background: #1a0a2a; border: 1px solid #4a2a6a; color: #cc88ff; font-size: 0.78rem; padding: 4px 12px; border-radius: 20px; cursor: pointer; }
-    .save-btn { background: linear-gradient(135deg, #6600cc, #aa00ff); color: #ffffff; border: none; border-radius: 50px; padding: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 24px #aa00ff44; }
-    .back-btn { background: transparent; color: #6a4a8a; border: 1px solid #2a1a4a; border-radius: 50px; padding: 12px; font-size: 0.85rem; cursor: pointer; }
-    #save-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: #00cc66cc; color: white; padding: 12px 28px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; z-index: 200; pointer-events: none; }
-    .saved-preview { background: #0a1a0a; border: 1px solid #1a3a1a; border-radius: 8px; padding: 10px 14px; font-size: 0.78rem; color: #44aa66; display: none; line-height: 1.6; }
+    
+    body { 
+      font-family: 'Noto Sans KR', sans-serif; 
+      background: #0a0f1e; 
+      color: #ffffff; 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    
+    /* 헤더 */
+    .admin-header { 
+      background: linear-gradient(90deg, #1a0030, #3a0060); 
+      padding: 16px 24px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      border-bottom: 2px solid #aa00ff44; 
+    }
+    
+    .admin-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      font-size: 1rem; 
+      font-weight: 700; 
+    }
+    
+    .admin-badge { 
+      background: #aa00ff33; 
+      border: 1px solid #aa00ff88; 
+      color: #cc88ff; 
+      font-size: 0.7rem; 
+      padding: 3px 10px; 
+      border-radius: 20px; 
+    }
+    
+    /* 메인 콘텐츠 */
+    .admin-body { 
+      flex: 1; 
+      padding: 24px 20px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 20px; 
+      max-width: 480px; 
+      width: 100%; 
+      margin: 0 auto; 
+    }
+    
+    /* 카드 */
+    .setting-card { 
+      background: #0d1428; 
+      border: 1px solid #2a1a4a; 
+      border-radius: 12px; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 14px; 
+    }
+    
+    .setting-card h3 { 
+      font-size: 0.95rem; 
+      color: #cc88ff; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    
+    /* 입력 필드 */
+    .field-group { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    
+    label { 
+      font-size: 0.8rem; 
+      color: #8a7aaa; 
+    }
+    
+    input[type="text"], textarea { 
+      background: #0a0f1e; 
+      border: 1px solid #2a2a4a; 
+      border-radius: 8px; 
+      color: #ffffff; 
+      padding: 10px 14px; 
+      width: 100%; 
+      outline: none; 
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    
+    input[type="text"]:focus, textarea:focus {
+      border-color: #aa00ff88;
+      box-shadow: 0 0 0 2px #aa00ff22;
+    }
+
+    textarea {
+      resize: none;
+      height: 60px;
+      line-height: 1.5;
+    }
+    
+    /* 키워드 태그 */
+    .keyword-hint { 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap; 
+    }
+    
+    .keyword-tag { 
+      background: #1a0a2a; 
+      border: 1px solid #4a2a6a; 
+      color: #cc88ff; 
+      font-size: 0.78rem; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      cursor: pointer; 
+    }
+    
+    /* 버튼 */
+    .save-btn { 
+      background: linear-gradient(135deg, #6600cc, #aa00ff); 
+      color: #ffffff; 
+      border: none; 
+      border-radius: 50px; 
+      padding: 16px; 
+      font-size: 1rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      margin-top: 10px; 
+      box-shadow: 0 4px 24px #aa00ff44; 
+    }
+    
+    .back-btn { 
+      background: transparent; 
+      color: #6a4a8a; 
+      border: 1px solid #2a1a4a; 
+      border-radius: 50px; 
+      padding: 12px; 
+      font-size: 0.85rem; 
+      cursor: pointer; 
+    }
+    
+    /* 알림 & 미리보기 */
+    #save-toast { 
+      position: fixed; 
+      bottom: 32px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      background: #00cc66cc; 
+      color: white; 
+      padding: 12px 28px; 
+      border-radius: 30px; 
+      opacity: 0; 
+      transition: opacity 0.3s; 
+      z-index: 200; 
+      pointer-events: none; 
+    }
+    
+    .saved-preview { 
+      background: #0a1a0a; 
+      border: 1px solid #1a3a1a; 
+      border-radius: 8px; 
+      padding: 10px 14px; 
+      font-size: 0.78rem; 
+      color: #44aa66; 
+      display: none; 
+      line-height: 1.6; 
+    }
+    
     .saved-preview.visible { display: block; }
   </style>
 </head>
@@ -36,46 +189,40 @@
   </header>
 
   <main class="admin-body">
+    <!-- 부모님 정보 -->
     <div class="setting-card">
       <h3>👨‍👩‍👧 부모님 정보</h3>
       <div class="field-group">
-        <label>아버지 성함</label>
+        <label>아버지 성함(할아버지 성함)</label>
         <input type="text" id="dad-name" placeholder="예) 홍길동" />
       </div>
       <div class="field-group">
-        <label>어머니 성함</label>
+        <label>어머니 성함(할머니 성함)</label>
         <input type="text" id="mom-name" placeholder="예) 김영희" />
       </div>
     </div>
 
-    <!-- PIN 설정 카드 (누락되었던 부분 추가) -->
-    <div class="setting-card">
-      <h3>🔑 관리자 PIN 번호</h3>
-      <div class="pin-input-wrap">
-        <input type="password" class="pin-digit" id="pin1" maxlength="1" inputmode="numeric">
-        <input type="password" class="pin-digit" id="pin2" maxlength="1" inputmode="numeric">
-        <input type="password" class="pin-digit" id="pin3" maxlength="1" inputmode="numeric">
-        <input type="password" class="pin-digit" id="pin4" maxlength="1" inputmode="numeric">
-      </div>
-    </div>
-
+    <!-- 음성 키워드 -->
     <div class="setting-card">
       <h3>🎙️ 음성 인증 키워드</h3>
       <div class="field-group">
+        <label>부모님이 말씀하셔야 하는 단어</label>
         <input type="text" id="voice-keyword" placeholder="예) 사랑해" />
       </div>
       <div class="keyword-hint">
         <span class="keyword-tag" onclick="setKeyword('사랑해')">사랑해</span>
         <span class="keyword-tag" onclick="setKeyword('고마워')">고마워</span>
         <span class="keyword-tag" onclick="setKeyword('감사합니다')">감사합니다</span>
+        <span class="keyword-tag" onclick="setKeyword('사랑합니다')">사랑합니다</span>
       </div>
     </div>
 
+    <!-- 인출 퀴즈 -->
     <div class="setting-card">
-      <h3>🧮 인출 퀴즈 설정</h3>
+      <h3>🧮 인출 한도 퀴즈 설정</h3>
       <div class="field-group">
-        <label>퀴즈 문제</label>
-        <textarea id="quiz-question" placeholder="예) 엄마생일+아빠생일=?"></textarea>
+        <label>퀴즈 문제 (가족 날짜로 구성)</label>
+        <textarea id="quiz-question" placeholder="예) 엄마생일+아빠생일+내생일=?"></textarea>
       </div>
       <div class="field-group">
         <label>정답 숫자</label>
@@ -83,8 +230,10 @@
       </div>
     </div>
 
+    <!-- 현재 저장값 -->
     <div class="saved-preview" id="saved-preview"></div>
 
+    <!-- 버튼 -->
     <button class="save-btn" onclick="saveSettings()">✅ 설정 저장</button>
     <button class="back-btn" onclick="goBack()">← 메인으로 돌아가기</button>
   </main>
@@ -92,37 +241,23 @@
   <div id="save-toast">✅ 설정이 저장되었습니다!</div>
 
   <script>
-    // PIN 자동 포커스
-    document.querySelectorAll('.pin-digit').forEach((input, idx, arr) => {
-      input.addEventListener('input', () => {
-        if (input.value && idx < arr.length - 1) arr[idx + 1].focus();
-      });
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !input.value && idx > 0) arr[idx - 1].focus();
-      });
-    });
-
+    // 키워드 빠른 입력
     function setKeyword(word) {
       document.getElementById('voice-keyword').value = word;
     }
 
+    // 설정 저장
     function saveSettings() {
-      // PIN 값 가져오기
-      const pinValue = ['pin1', 'pin2', 'pin3', 'pin4']
-        .map(id => document.getElementById(id).value)
-        .join('');
-
       const settings = {
         dadName: document.getElementById('dad-name').value.trim(),
         momName: document.getElementById('mom-name').value.trim(),
-        pin: pinValue, // PIN 저장 추가
         voiceKeyword: document.getElementById('voice-keyword').value.trim(),
         quizQuestion: document.getElementById('quiz-question').value.trim(),
         quizAnswer: document.getElementById('quiz-answer').value.trim(),
       };
 
       if (!settings.voiceKeyword || !settings.quizAnswer) {
-        alert('필수 정보를 입력해주세요.');
+        alert('필수 정보(키워드, 퀴즈 정답)를 입력해주세요.');
         return;
       }
 
@@ -131,12 +266,14 @@
       showPreview(settings);
     }
 
+    // 토스트 알림 띄우기
     function showToast() {
       const toast = document.getElementById('save-toast');
       toast.style.opacity = '1';
       setTimeout(() => { toast.style.opacity = '0'; }, 2000);
     }
 
+    // 저장된 데이터 미리보기 갱신
     function showPreview(s) {
       const el = document.getElementById('saved-preview');
       el.className = 'saved-preview visible';
@@ -147,9 +284,11 @@
       `;
     }
 
+    // 기존 저장값 불러오기
     function loadSettings() {
       const raw = localStorage.getItem('atm_settings');
       if (!raw) return;
+      
       const s = JSON.parse(raw);
       
       if (s.dadName) document.getElementById('dad-name').value = s.dadName;
@@ -158,19 +297,15 @@
       if (s.quizQuestion) document.getElementById('quiz-question').value = s.quizQuestion;
       if (s.quizAnswer) document.getElementById('quiz-answer').value = s.quizAnswer;
       
-      if (s.pin && s.pin.length === 4) {
-        s.pin.split('').forEach((d, i) => {
-          const el = document.getElementById('pin' + (i + 1));
-          if(el) el.value = d;
-        });
-      }
       showPreview(s);
     }
 
+    // 뒤로 가기
     function goBack() {
       location.href = 'index.html';
     }
 
+    // 페이지 로드 시 기존 데이터 불러오기 실행
     window.onload = loadSettings;
   </script>
 </body>
