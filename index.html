@@ -2,22 +2,18 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>부모님 용돈 ATM</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Noto Sans KR', sans-serif;
       background: #0a0f1e;
       color: #ffffff;
-      height: 100vh;
+      height: 100dvh; 
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -26,13 +22,12 @@
       user-select: none;
     }
 
-    /* 히든 관리자 진입 영역 */
     #hidden-tap-zone {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 60px;
+      height: 50px;
       z-index: 100;
     }
 
@@ -40,45 +35,20 @@
     .atm-header {
       width: 100%;
       background: linear-gradient(90deg, #003580, #0057c8);
-      padding: 16px 24px;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 2px solid #00aaff44;
-      box-shadow: 0 2px 20px #0057c855;
+      flex-shrink: 0;
     }
 
-    .atm-logo {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #ffffff;
-    }
+    .atm-logo { font-size: 1rem; font-weight: 700; letter-spacing: 2px; }
+    .atm-logo span { color: #00d4ff; }
+    .atm-status { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #a0c8ff; }
+    .status-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; animation: blink 1.5s infinite; }
 
-    .atm-logo span {
-      color: #00d4ff;
-    }
-
-    .atm-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: #a0c8ff;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background: #00ff88;
-      border-radius: 50%;
-      animation: blink 1.5s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     /* 메인 콘텐츠 */
     .atm-body {
@@ -87,46 +57,50 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 32px;
-      padding: 24px;
+      gap: 20px;
+      padding: 10px;
       width: 100%;
+      min-height: 0;
     }
 
-    /* 카드 삽입 아이콘 애니메이션 */
+    /* 카드 아이콘 (디자인 복구 완료) */
     .card-icon {
       position: relative;
-      width: 100px;
-      height: 70px;
+      width: 80px;
+      height: 55px;
+      flex-shrink: 0;
     }
 
     .card-icon .card {
-      width: 80px;
-      height: 50px;
+      width: 100%;
+      height: 100%;
       border: 3px solid #00aaff;
       border-radius: 8px;
       background: linear-gradient(135deg, #0a1a3a, #0d2555);
       position: relative;
       animation: cardFloat 3s ease-in-out infinite;
-      box-shadow: 0 0 20px #00aaff44;
+      box-shadow: 0 0 15px #00aaff44;
     }
 
+    /* 노란색 IC 칩 */
     .card-icon .card::before {
       content: '';
       position: absolute;
-      top: 12px;
-      left: 10px;
-      width: 28px;
-      height: 20px;
+      top: 25%;
+      left: 12%;
+      width: 32%;
+      height: 38%;
       background: linear-gradient(135deg, #ffd700, #ffaa00);
       border-radius: 3px;
     }
 
+    /* 하단 장식 라인 */
     .card-icon .card::after {
       content: '';
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
+      bottom: 20%;
+      left: 12%;
+      right: 12%;
       height: 3px;
       background: #00aaff55;
       border-radius: 2px;
@@ -134,135 +108,77 @@
 
     @keyframes cardFloat {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-6px); }
     }
 
     /* 환영 메시지 */
-    .welcome-section {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .welcome-section { text-align: center; display: flex; flex-direction: column; gap: 8px; }
+    .welcome-main { font-size: 1.5rem; font-weight: 700; }
+    .welcome-main .highlight { color: #00d4ff; }
+    .welcome-sub { font-size: 0.85rem; color: #8ab4d4; }
 
-    .welcome-main {
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      animation: fadeInUp 1s ease;
-    }
-
-    .welcome-main .highlight {
-      color: #00d4ff;
-    }
-
-    .welcome-sub {
-      font-size: 0.95rem;
-      color: #8ab4d4;
-      letter-spacing: 1px;
-      animation: fadeInUp 1s ease 0.2s both;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 구분선 */
     .divider {
-      width: 200px;
+      width: 160px;
       height: 1px;
       background: linear-gradient(90deg, transparent, #00aaff88, transparent);
     }
 
-    /* 안내 텍스트 롤링 */
     .info-ticker {
       background: #00aaff11;
       border: 1px solid #00aaff33;
       border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 0.85rem;
+      padding: 8px 16px;
+      font-size: 0.8rem;
       color: #a0c8ff;
+      width: 90%;
+      max-width: 300px;
       text-align: center;
-      width: 100%;
-      max-width: 340px;
-      animation: fadeInUp 1s ease 0.4s both;
     }
 
-    .info-ticker .ticker-text {
-      animation: tickerScroll 6s ease-in-out infinite;
-    }
-
-    @keyframes tickerScroll {
-      0%, 30% { opacity: 1; }
-      40%, 60% { opacity: 0; }
-      70%, 100% { opacity: 1; }
-    }
-
-    /* 시작 버튼 */
     .start-btn {
       background: linear-gradient(135deg, #0057c8, #00aaff);
       color: #ffffff;
       border: none;
       border-radius: 50px;
-      padding: 16px 48px;
-      font-size: 1.1rem;
+      padding: 12px 40px;
+      font-size: 1rem;
       font-weight: 700;
       letter-spacing: 2px;
       cursor: pointer;
-      box-shadow: 0 4px 24px #00aaff55;
+      box-shadow: 0 4px 20px #00aaff55;
       transition: all 0.2s ease;
-      animation: fadeInUp 1s ease 0.6s both;
-      font-family: 'Noto Sans KR', sans-serif;
     }
 
-    .start-btn:hover, .start-btn:active {
-      transform: scale(1.05);
-      box-shadow: 0 6px 32px #00aaffaa;
-    }
-
-    /* 하단 정보 */
     .atm-footer {
       width: 100%;
-      padding: 14px 24px;
+      padding: 10px 24px;
       background: #050a14;
       border-top: 1px solid #00aaff22;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
-    .footer-time {
-      font-size: 0.8rem;
-      color: #4a6a88;
-      font-variant-numeric: tabular-nums;
+    .footer-time { font-size: 0.75rem; color: #4a6a88; }
+    .footer-notice { font-size: 0.7rem; color: #2a4a66; }
+
+    /* 가로 모드 최적화 (칩 디자인 유지됨) */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .atm-header { padding: 6px 20px; }
+      .atm-footer { padding: 6px 20px; }
+      .atm-body { flex-direction: row; gap: 30px; padding: 5px; }
+      .card-icon { width: 60px; height: 42px; }
+      .welcome-section { text-align: left; }
+      .welcome-main { font-size: 1.2rem; }
+      .welcome-sub { font-size: 0.75rem; }
+      .divider, .info-ticker { display: none; }
+      .start-btn { padding: 10px 30px; font-size: 0.9rem; }
     }
 
-    .footer-notice {
-      font-size: 0.75rem;
-      color: #2a4a66;
-    }
-
-    /* 배경 파티클 효과 */
-    .bg-particles {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: #00aaff;
-      border-radius: 50%;
-      opacity: 0;
-      animation: particleRise linear infinite;
-    }
-
+    /* 파티클 효과 */
+    .bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .particle { position: absolute; width: 2px; height: 2px; background: #00aaff; border-radius: 50%; opacity: 0; animation: particleRise linear infinite; }
     @keyframes particleRise {
       0% { transform: translateY(100vh); opacity: 0; }
       10% { opacity: 0.6; }
@@ -270,33 +186,27 @@
       100% { transform: translateY(-10px); opacity: 0; }
     }
 
-    /* 히든 진입 토스트 */
     #tap-toast {
       position: fixed;
-      bottom: 80px;
+      bottom: 60px;
       left: 50%;
       transform: translateX(-50%);
       background: #ff6600cc;
       color: white;
-      padding: 8px 20px;
+      padding: 6px 16px;
       border-radius: 20px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       opacity: 0;
       transition: opacity 0.3s;
       z-index: 200;
-      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- 히든 관리자 진입 터치 영역 -->
   <div id="hidden-tap-zone"></div>
-
-  <!-- 배경 파티클 -->
   <div class="bg-particles" id="particles"></div>
 
-  <!-- 상단 헤더 -->
   <header class="atm-header">
     <div class="atm-logo">FAMILY <span>ATM</span></div>
     <div class="atm-status">
@@ -305,7 +215,6 @@
     </div>
   </header>
 
-  <!-- 메인 콘텐츠 -->
   <main class="atm-body">
     <div class="card-icon">
       <div class="card"></div>
@@ -329,7 +238,6 @@
     <button class="start-btn" onclick="goToStep1()">거래 시작</button>
   </main>
 
-  <!-- 하단 푸터 -->
   <footer class="atm-footer">
     <div class="footer-time" id="clock">00:00:00</div>
     <div class="footer-notice">24시간 가족 전용 서비스</div>
@@ -338,7 +246,7 @@
   <div id="tap-toast"></div>
 
   <script>
-    // 부모님 이름 환영 문구
+    // 이름 로드
     (function () {
       const s = JSON.parse(localStorage.getItem('atm_settings') || '{}');
       const names = [s.dadName, s.momName].filter(Boolean).join(', ');
@@ -351,15 +259,12 @@
     // 시계
     function updateClock() {
       const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+      document.getElementById('clock').textContent = now.toTimeString().split(' ')[0];
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 안내 문구 롤링
+    // 롤링 메시지
     const tickerMessages = [
       '고객님의 소중한 거래를 도와드립니다',
       '보안 인증 절차를 통해 안전하게 거래하세요',
@@ -371,32 +276,27 @@
       document.getElementById('ticker').textContent = tickerMessages[tickerIdx];
     }, 4000);
 
-    // 배경 파티클 생성
+    // 파티클 생성
     const container = document.getElementById('particles');
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 15; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
       p.style.left = Math.random() * 100 + '%';
       p.style.animationDuration = (6 + Math.random() * 10) + 's';
       p.style.animationDelay = (Math.random() * 10) + 's';
-      p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
       container.appendChild(p);
     }
 
-    // 히든 관리자 진입 (상단 5번 연속 터치)
+    // 관리자 진입
     let tapCount = 0;
     let tapTimer = null;
     document.getElementById('hidden-tap-zone').addEventListener('click', () => {
       tapCount++;
       clearTimeout(tapTimer);
-
       if (tapCount >= 5) {
-        tapCount = 0;
         window.location.href = 'admin.html';
         return;
       }
-
-      const remaining = 5 - tapCount;
       showToast(`관리자 진입: ${tapCount}/5`);
       tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
     });
@@ -405,15 +305,12 @@
       const toast = document.getElementById('tap-toast');
       toast.textContent = msg;
       toast.style.opacity = '1';
-      clearTimeout(toast._timer);
-      toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 1000);
+      setTimeout(() => { toast.style.opacity = '0'; }, 1000);
     }
 
-    // 거래 시작 버튼
     function goToStep1() {
       window.location.href = 'step1.html';
     }
   </script>
-
 </body>
 </html>
