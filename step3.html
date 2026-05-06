@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>3단계 - 음성 인증</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
@@ -12,7 +12,7 @@
       font-family: 'Noto Sans KR', sans-serif;
       background: #0a0f1e;
       color: #fff;
-      height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -21,190 +21,135 @@
       user-select: none;
     }
 
+    /* 헤더 */
     .atm-header {
       width: 100%;
       background: linear-gradient(90deg, #003580, #0057c8);
-      padding: 16px 24px;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 2px solid #00aaff44;
+      flex-shrink: 0;
     }
     .atm-logo { font-size: 1rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
     .atm-logo span { color: #00d4ff; }
-    .step-indicator { display: flex; gap: 6px; align-items: center; }
+    .step-indicator { display: flex; gap: 6px; }
     .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a3a5a; }
     .step-dot.active { background: #00aaff; box-shadow: 0 0 6px #00aaff; }
     .step-dot.done { background: #00ff88; }
 
+    /* 메인 바디 */
     .atm-body {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
-      padding: 24px;
+      gap: 20px;
+      padding: 10px 24px;
+      width: 100%;
+      min-height: 0;
+    }
+
+    .info-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .step-label { font-size: 0.7rem; color: #4a8aaa; letter-spacing: 3px; text-transform: uppercase; }
+    .step-title { font-size: 1.25rem; font-weight: 700; }
+    .step-desc { font-size: 0.85rem; color: #6a9aaa; line-height: 1.5; }
+
+    /* 마이크 영역 */
+    .interaction-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
       width: 100%;
     }
 
-    .step-label { font-size: 0.75rem; color: #4a8aaa; letter-spacing: 3px; text-transform: uppercase; }
-    .step-title { font-size: 1.4rem; font-weight: 700; text-align: center; }
-    .step-desc { font-size: 0.9rem; color: #6a9aaa; text-align: center; line-height: 1.8; }
-
-    /* 마이크 아이콘 */
     .mic-wrap {
       position: relative;
-      width: 130px; height: 130px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 110px; height: 110px;
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
     }
-
-    .mic-ring {
-      position: absolute;
-      border-radius: 50%;
-      border: 2px solid #00aaff00;
-      width: 130px; height: 130px;
-    }
-    .mic-ring.listening {
-      border-color: #00aaff44;
-      animation: micRipple 1s ease-out infinite;
-    }
-    .mic-ring:nth-child(2) { animation-delay: 0.3s !important; }
-    .mic-ring:nth-child(3) { animation-delay: 0.6s !important; }
-
-    @keyframes micRipple {
-      0% { transform: scale(0.8); opacity: 0.8; }
-      100% { transform: scale(1.4); opacity: 0; }
-    }
+    .mic-ring { position: absolute; border-radius: 50%; border: 2px solid transparent; width: 100%; height: 100%; }
+    .mic-ring.listening { border-color: #00aaff44; animation: micRipple 1s ease-out infinite; }
+    @keyframes micRipple { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 0; } }
 
     .mic-btn {
-      width: 80px; height: 80px;
+      width: 70px; height: 70px;
       background: linear-gradient(135deg, #0057c8, #0088ff);
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      box-shadow: 0 4px 20px #0057c855;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      border: none; cursor: pointer; z-index: 1;
       transition: all 0.2s;
-      z-index: 1;
-      border: none;
-      cursor: pointer;
     }
-    .mic-btn.listening {
-      background: linear-gradient(135deg, #cc0000, #ff4444);
-      box-shadow: 0 4px 20px #ff444455;
-      animation: micPulse 0.8s ease-in-out infinite;
-    }
-    .mic-btn.success {
-      background: linear-gradient(135deg, #006600, #00cc44);
-    }
+    .mic-btn.listening { background: linear-gradient(135deg, #cc0000, #ff4444); animation: micPulse 0.8s infinite; }
+    .mic-btn.success { background: linear-gradient(135deg, #006600, #00cc44); }
+    @keyframes micPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-    @keyframes micPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
-
-    /* 인식 텍스트 큰 표시창 */
+    /* 인식 표시창 */
     .voice-display {
-      width: 100%;
-      max-width: 300px;
-      background: #0a1a2a;
-      border: 2px solid #0a3a6a;
-      border-radius: 16px;
-      padding: 18px 20px;
-      min-height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      width: 100%; max-width: 280px;
+      background: #0a1a2a; border: 2px solid #0a3a6a;
+      border-radius: 12px; padding: 12px;
+      min-height: 60px; display: flex; align-items: center; justify-content: center;
     }
-    .voice-display.listening {
-      border-color: #00aaff66;
-      animation: boxGlow 1s ease-in-out infinite;
-    }
-    .voice-display.success {
-      border-color: #00ff88;
-      box-shadow: 0 0 24px #00ff8844;
-    }
-    .voice-display.fail {
-      border-color: #ff4444;
-      box-shadow: 0 0 20px #ff444433;
-      animation: boxShake 0.4s ease;
+    .voice-text { font-size: 1.2rem; font-weight: 700; color: #aaddff; text-align: center; }
+
+    .status-line { font-size: 0.8rem; color: #4a7a9a; min-height: 1.2rem; }
+    .status-line.success { color: #00ff88; }
+    .status-line.fail { color: #ff6666; }
+
+    /* 푸터 */
+    .atm-footer {
+      width: 100%; padding: 10px 24px; background: #050a14;
+      border-top: 1px solid #00aaff22; text-align: center;
+      font-size: 0.7rem; color: #2a4a66; flex-shrink: 0;
     }
 
-    @keyframes boxGlow {
-      0%, 100% { box-shadow: 0 0 8px #00aaff22; }
-      50%       { box-shadow: 0 0 20px #00aaff44; }
-    }
-    @keyframes boxShake {
-      0%, 100% { transform: translateX(0); }
-      20%      { transform: translateX(-6px); }
-      40%      { transform: translateX(6px); }
-      60%      { transform: translateX(-4px); }
-      80%      { transform: translateX(4px); }
+    /* ======================================================
+       가로 모드 (Landscape) 최적화
+    ====================================================== */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .atm-header { padding: 6px 24px; }
+      .atm-footer { padding: 6px 24px; }
+      
+      .atm-body {
+        flex-direction: row; /* 좌우 배치 */
+        justify-content: space-evenly;
+        gap: 30px; padding: 5px 30px;
+      }
+
+      .info-section {
+        text-align: left; align-items: flex-start;
+        max-width: 250px;
+      }
+      .step-label { display: none; }
+      .step-title { font-size: 1.1rem; }
+      .step-desc { font-size: 0.75rem; text-align: left; }
+
+      .interaction-section { width: auto; gap: 10px; }
+      .mic-wrap { width: 90px; height: 90px; }
+      .mic-btn { width: 60px; height: 60px; font-size: 1.5rem; }
+      .voice-display { width: 220px; min-height: 50px; padding: 8px; }
+      .voice-text { font-size: 1rem; }
     }
 
-    /* 인식된 텍스트 — 크게 */
-    .voice-text {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #aaddff;
-      text-align: center;
-      letter-spacing: 2px;
-      word-break: break-all;
-      line-height: 1.4;
-      transition: color 0.3s;
-    }
-    .voice-display.listening .voice-text { color: #ffffff; }
-    .voice-display.success   .voice-text { color: #00ff88; }
-    .voice-display.fail      .voice-text { color: #ff6666; }
-
-    /* 작은 상태 표시줄 */
-    .status-line {
-      font-size: 0.85rem;
-      color: #4a7a9a;
-      text-align: center;
-      min-height: 1.2rem;
-      letter-spacing: 1px;
-    }
-    .status-line.success { color: #00ff88; font-weight: 700; }
-    .status-line.fail    { color: #ff6666; }
-
-    /* 실패 토스트 알림 */
     .retry-toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #3a0a0a;
-      border: 1px solid #ff444466;
-      color: #ffaaaa;
-      padding: 12px 22px;
-      border-radius: 12px;
-      font-size: 0.88rem;
-      text-align: center;
-      line-height: 1.6;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      z-index: 100;
-      white-space: nowrap;
+      position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+      background: #3a0a0a; border: 1px solid #ff444466; color: #ffaaaa;
+      padding: 10px 20px; border-radius: 10px; font-size: 0.8rem;
+      opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none;
     }
     .retry-toast.show { opacity: 1; }
-
-    .atm-footer {
-      width: 100%;
-      padding: 14px 24px;
-      background: #050a14;
-      border-top: 1px solid #00aaff22;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #2a4a66;
-    }
   </style>
 </head>
 <body>
@@ -221,33 +166,34 @@
   </header>
 
   <main class="atm-body">
-    <div class="step-label">STEP 3 / 5</div>
-    <div class="step-title">음성 보안 인증</div>
-    <div class="step-desc">마이크 버튼을 누르고<br>지정된 암호를 말씀해 주세요</div>
+    <section class="info-section">
+      <div class="step-label">STEP 3 / 5</div>
+      <div class="step-title">음성 보안 인증</div>
+      <div class="step-desc">지정된 암호를 말씀해 주세요</div>
+      <div class="status-line" id="status-line">마이크를 눌러 시작하세요</div>
+    </section>
 
-    <div class="mic-wrap" onclick="toggleListen()">
-      <div class="mic-ring" id="ring1"></div>
-      <div class="mic-ring" id="ring2"></div>
-      <div class="mic-ring" id="ring3"></div>
-      <button class="mic-btn" id="mic-btn">🎙️</button>
-    </div>
+    <section class="interaction-section">
+      <div class="mic-wrap" onclick="toggleListen()">
+        <div class="mic-ring" id="ring1"></div>
+        <div class="mic-ring" id="ring2"></div>
+        <div class="mic-ring" id="ring3"></div>
+        <button class="mic-btn" id="mic-btn">🎙️</button>
+      </div>
 
-    <div class="voice-display" id="voice-display">
-      <div class="voice-text" id="voice-text">—</div>
-    </div>
-    <div class="status-line" id="status-line">마이크 버튼을 눌러 시작하세요</div>
+      <div class="voice-display" id="voice-display">
+        <div class="voice-text" id="voice-text">—</div>
+      </div>
+    </section>
   </main>
 
-  <div class="retry-toast" id="retry-toast">
-    ⚠️ 인식된 내용이 다릅니다<br>다시 마이크를 눌러 말씀해 주세요
-  </div>
+  <div class="retry-toast" id="retry-toast">⚠️ 인식된 내용이 다릅니다</div>
 
-  <footer class="atm-footer">음성은 기기 내에서만 처리되며 저장되지 않습니다</footer>
+  <footer class="atm-footer">음성은 기기 내에서 처리되며 저장되지 않습니다</footer>
 
   <script>
     const settings = JSON.parse(localStorage.getItem('atm_settings') || '{}');
     const keyword = settings.voiceKeyword || '사랑해';
-
     let recognition = null;
     let isListening = false;
 
@@ -259,20 +205,18 @@
     function startListen() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        document.getElementById('status-msg').textContent = '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다';
+        alert('이 브라우저는 음성 인식을 지원하지 않습니다.');
         return;
       }
-
       recognition = new SpeechRecognition();
       recognition.lang = 'ko-KR';
-      recognition.continuous = false;
       recognition.interimResults = true;
 
       recognition.onstart = () => {
         isListening = true;
         setVoiceState('listening', '듣고 있습니다...', '🎙️ 지금 말씀하세요');
         document.getElementById('mic-btn').className = 'mic-btn listening';
-        ['ring1','ring2','ring3'].forEach(id => document.getElementById(id).className = 'mic-ring listening');
+        ['ring1','ring2','ring3'].forEach(id => document.getElementById(id).classList.add('listening'));
       };
 
       recognition.onresult = (e) => {
@@ -282,18 +226,17 @@
           else interim += e.results[i][0].transcript;
         }
         const heard = final || interim || '';
-        if (heard) document.getElementById('voice-text').textContent = heard;
+        document.getElementById('voice-text').textContent = heard;
 
         if (final) {
-          if (final.includes(keyword)) onSuccess();
+          if (final.replace(/\s/g, '').includes(keyword.replace(/\s/g, ''))) onSuccess();
           else onFail(heard);
         }
       };
 
       recognition.onerror = () => {
         stopListen();
-        setVoiceState('fail', '인식 오류', '다시 눌러 시도해 주세요');
-        showRetryToast('마이크 오류가 발생했습니다\n다시 눌러 시도해 주세요');
+        setVoiceState('fail', '인식 오류', '다시 시도해 주세요');
       };
 
       recognition.onend = () => { if (isListening) stopListen(); };
@@ -304,45 +247,40 @@
       isListening = false;
       if (recognition) recognition.stop();
       document.getElementById('mic-btn').className = 'mic-btn';
-      ['ring1','ring2','ring3'].forEach(id => document.getElementById(id).className = 'mic-ring');
+      ['ring1','ring2','ring3'].forEach(id => document.getElementById(id).classList.remove('listening'));
     }
 
     function setVoiceState(state, bigText, statusText) {
       const disp = document.getElementById('voice-display');
-      disp.className = 'voice-display' + (state !== 'idle' ? ' ' + state : '');
+      disp.className = 'voice-display ' + state;
       document.getElementById('voice-text').textContent = bigText;
       const sl = document.getElementById('status-line');
-      sl.className = 'status-line' + (state === 'success' ? ' success' : state === 'fail' ? ' fail' : '');
+      sl.className = 'status-line ' + state;
       sl.textContent = statusText;
-    }
-
-    function showRetryToast(msg) {
-      const toast = document.getElementById('retry-toast');
-      toast.innerHTML = '⚠️ ' + msg.replace('\n', '<br>');
-      toast.classList.add('show');
-      clearTimeout(toast._t);
-      toast._t = setTimeout(() => toast.classList.remove('show'), 2800);
     }
 
     function onFail(heard) {
       stopListen();
-      setVoiceState('fail', heard || '?', '인식된 내용이 다릅니다');
-      showRetryToast('인식된 내용이 다릅니다\n다시 마이크를 눌러 말씀해 주세요');
-      if (navigator.vibrate) navigator.vibrate(300);
-      setTimeout(() => setVoiceState('idle', '—', '마이크 버튼을 눌러 시작하세요'), 2200);
+      setVoiceState('fail', heard || '?', '내용이 일치하지 않습니다');
+      showToast();
+      if (navigator.vibrate) navigator.vibrate(200);
+      setTimeout(() => setVoiceState('idle', '—', '마이크를 눌러 시작하세요'), 2000);
     }
 
     function onSuccess() {
       isListening = false;
-      if (recognition) recognition.stop();
       document.getElementById('mic-btn').className = 'mic-btn success';
       document.getElementById('mic-btn').textContent = '✅';
-      ['ring1','ring2','ring3'].forEach(id => document.getElementById(id).className = 'mic-ring');
-      setVoiceState('success', '✅ 인증 완료!', '음성 인증이 완료되었습니다');
+      setVoiceState('success', '✅ 인증 완료!', '본인 확인이 완료되었습니다');
       if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-      setTimeout(() => window.location.href = 'step4.html', 1400);
+      setTimeout(() => window.location.href = 'step4.html', 1200);
+    }
+
+    function showToast() {
+      const t = document.getElementById('retry-toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
     }
   </script>
-
 </body>
 </html>
